@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--accent:#3b82f6;--text:#f1f5f9;--muted:#94a3b8}
+body[data-theme="ungu"]{--bg:#1a0f2e;--card:#2d1b4e;--border:#4c1d95;--accent:#a855f7;--text:#f3e8ff;--muted:#c4b5fd}
+body[data-theme="hijau"]{--bg:#052e16;--card:#14532d;--border:#166534;--accent:#22c55e;--text:#dcfce7;--muted:#86efac}
+body[data-theme="pink"]{--bg:#500724;--card:#831843;--border:#9d174d;--accent:#ec4899;--text:#fce7f3;--muted:#f9a8d4}
+body[data-theme="terang"]{--bg:#f1f5f9;--card:#ffffff;--border:#cbd5e1;--accent:#3b82f6;--text:#0f172a;--muted:#475569}
+*{font-family:'Poppins',sans-serif;box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
+.container{max-width:600px;margin:0 auto}
+h1{text-align:center}
+.sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:20px}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid var(--border)}
+#timerDisplay{font-size:42px;font-weight:700;text-align:center;margin:10px 0}
+.timer-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.timer-btns button{padding:10px 16px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
+.btn-start{background:#22c55e;color:#fff}.btn-pause{background:#f59e0b;color:#fff}.btn-reset{background:var(--border);color:var(--text)}.btn-save{background:var(--accent);color:#fff}
+.bar-bg{background:var(--border);border-radius:10px;height:10px;overflow:hidden;margin-top:8px}
+.bar{height:100%;background:var(--accent);width:0%}
+.form{display:grid;gap:8px;margin-bottom:16px}
+input,select{padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);width:100%}
+.btn-add{background:var(--accent);border:none;font-weight:700;cursor:pointer;padding:12px;border-radius:10px;color:#fff}
+.filter{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter button{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:20px;cursor:pointer}
+.filter button.active{background:var(--accent);color:#fff}
+.task{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px}
+.task.done{opacity:0.5;text-decoration:line-through}
+.task .info{flex:1}.task .mapel{font-size:11px;background:var(--accent);padding:2px 8px;border-radius:20px;color:#fff}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.stat b{font-size:20px;display:block;color:var(--accent)}
+.stat span{font-size:12px;color:var(--muted)}
+.kalender{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.hari{font-size:11px;text-align:center;color:var(--muted);font-weight:700}
+.tgl-kal{aspect-ratio:1;background:var(--bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;border:1px solid var(--border)}
+.tgl-kal.aktif{background:var(--accent);color:#fff;font-weight:700;border-color:var(--accent)}
+.set-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.set-row button{padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:13px}
+.set-row select{width:auto;padding:8px}
+</style>
+</head>
+<body data-theme="biru">
+<div class="container">
+  <h1>Study Tracker</h1>
+  <p class="sub">Ada statistik + kalender sekarang</p>
+
+  <div class="card">
+    <div>🎨 Tampilan</div>
+    <div class="set-row">
+      <button onclick="setTheme('biru')">Biru</button>
+      <button onclick="setTheme('ungu')">Ungu</button>
+      <button onclick="setTheme('hijau')">Hijau</button>
+      <button onclick="setTheme('pink')">Pink</button>
+      <button onclick="setTheme('terang')">Terang</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="text-align:center">⏱️ Timer Belajar</div>
+    <select id="timerMapel" style="margin:10px 0">
+      <option>Umum</option><option>Matematika</option><option>Fisika</option><option>Bahasa</option><option>Coding</option>
+    </select>
+    <div id="timerDisplay">00:00:00</div>
+    <div class="timer-btns">
+      <button class="btn-start" onclick="startTimer()">Start</button>
+      <button class="btn-pause" onclick="pauseTimer()">Pause</button>
+      <button class="btn-reset" onclick="resetTimer()">Reset</button>
+      <button class="btn-save" onclick="saveTimer()">Selesai & Simpan</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>📊 Statistik Belajar</b>
+    <div class="stats" id="stats" style="margin-top:12px"></div>
+    <div style="font-size:13px;color:var(--muted)" id="totalJam"></div>
+  </div>
+
+  <div class="card">
+    <b>📅 Kalender</b>
+    <div class="kalender" id="kalender"></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">Warna = ada aktivitas belajar di hari itu</div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;font-size:14px"><span>Progress Total</span><span id="pct">0%</span></div>
+    <div class="bar-bg"><div class="bar" id="bar"></div></div>
+  </div>
+
+  <div class="form">
+    <input id="nama" placeholder="Apa yang mau dipelajari?">
+    <input id="mapel" placeholder="Mapel / Topik">
+    <input id="waktu" type="datetime-local">
+    <button class="btn-add" onclick="tambah()">+ Tambah ke List</button>
+  </div>
+
+  <div class="filter" id="filter"></div>
+  <div id="list"></div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('studyTracker')) || [];
+let filterAktif = 'Semua';
+let timerSec=0, timerInt=null, timerRun=false;
+
+function setTheme(t){ document.body.setAttribute('data-theme', t); localStorage.setItem('trackerTheme', t); }
+(function(){ document.body.setAttribute('data-theme', localStorage.getItem('trackerTheme')||'biru'); })();
+
+function formatTime(s){ let h=String(Math.floor(s/3600)).padStart(2,'0'); let m=String(Math.floor(s%3600/60)).padStart(2,'0'); let sec=String(s%60).padStart(2,'0'); return `${h}:${m}:${sec}`; }
+function updateTimerDisplay(){ document.getElementById('timerDisplay').innerText=formatTime(timerSec); }
+function startTimer(){ if(timerRun) return; timerRun=true; timerInt=setInterval(()=>{ timerSec++; updateTimerDisplay(); },1000); }
+function pauseTimer(){ timerRun=false; clearInterval(timerInt); }
+function resetTimer(){ pauseTimer(); timerSec=0; updateTimerDisplay(); }
+function saveTimer(){
+  if(timerSec<60) return alert('Minimal 1 menit!');
+  let mapel=document.getElementById('timerMapel').value;
+  let menit=Math.round(timerSec/60);
+  data.unshift({nama:`Belajar ${mapel} - ${menit} menit`, mapel, done:true, tgl: new Date().toLocaleString('id-ID'), iso: new Date().toISOString(), durasi: menit});
+  resetTimer(); simpan();
+}
+
+function tambah(){
+  let nama=document.getElementById('nama').value.trim();
+  let mapel=document.getElementById('mapel').value.trim()||'Umum';
+  let waktuVal=document.getElementById('waktu').value;
+  if(!nama) return alert('Isi dulu!');
+  let d = waktuVal ? new Date(waktuVal) : new Date();
+  let tglTampil = d.toLocaleString('id-ID', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+  data.unshift({nama, mapel, done:false, tgl: tglTampil, iso: d.toISOString()});
+  document.getElementById('nama').value=''; document.getElementById('waktu').value='';
+  simpan();
+}
+function toggle(i){ data[i].done=!data[i].done; simpan(); }
+function hapus(i){ data.splice(i,1); simpan(); }
+function setFilter(f){ filterAktif=f; render(); }
+function simpan(){ localStorage.setItem('studyTracker', JSON.stringify(data)); render(); }
+
+function getDurasi(t){ return t.durasi || 0; }
+
+function renderStats(){
+  let now=new Date();
+  let todayStr=now.toISOString().slice(0,10);
+  let weekAgo=new Date(); weekAgo.setDate(now.getDate()-6);
+  let monthStart=new Date(now.getFullYear(), now.getMonth(), 1);
+
+  let totalMenit=data.reduce((a,t)=>a+getDurasi(t),0);
+  let hariIni=data.filter(t=>t.iso && t.iso.slice(0,10)===todayStr).reduce((a,t)=>a+getDurasi(t),0);
+  let mingguIni=data.filter(t=>t.iso && new Date(t.iso)>=weekAgo).reduce((a,t)=>a+getDurasi(t),0);
+  let bulanIni=data.filter(t=>t.iso && new Date(t.iso)>=monthStart).reduce((a,t)=>a+getDurasi(t),0);
+
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><b>${(hariIni/60).toFixed(1)}j</b><span>Hari ini</span></div>
+    <div class="stat"><b>${(mingguIni/60).toFixed(1)}j</b><span>Minggu ini</span></div>
+    <div class="stat"><b>${(bulanIni/60).toFixed(1)}j</b><span>Bulan ini</span></div>
+    <div class="stat"><b>${(totalMenit/60).toFixed(1)}j</b><span>Total</span></div>
+  `;
+  document.getElementById('totalJam').innerText=`Total ${totalMenit} menit belajar dari ${data.length} aktivitas`;
+}
+
+function renderKalender(){
+  let now=new Date();
+  let year=now.getFullYear(), month=now.getMonth();
+  let firstDay=new Date(year, month, 1).getDay();
+  let daysInMonth=new Date(year, month+1, 0).getDate();
+  let hariMap={};
+  data.forEach(t=>{
+    if(!t.iso) return;
+    let d=new Date(t.iso);
+    if(d.getFullYear()===year && d.getMonth()===month){
+      let day=d.getDate();
+      hariMap[day]=(hariMap[day]||0)+getDurasi(t);
+    }
+  });
+  let html='<div class="hari">M</div><div class="hari">S</div><div class="hari">S</div><div class="hari">R</div><div class="hari">K</div><div class="hari">J</div><div class="hari">S</div>';
+  for(let i=0;i<firstDay;i++) html+='<div class="tgl-kal" style="visibility:hidden">·</div>';
+  for(let d=1;d<=daysInMonth;d++){
+    html+=`<div class="tgl-kal ${hariMap[d]?'aktif':''}" title="${hariMap[d]?hariMap[d]+' menit':''}">${d}</div>`;
+  }
+  document.getElementById('kalender').innerHTML=html;
+}
+
+function render(){
+  let list=document.getElementById('list');
+  let filterBox=document.getElementById('filter');
+  let mapels=[...new Set(data.map(t=>t.mapel))];
+  filterBox.innerHTML=['Semua',...mapels].map(f=>`<button class="${f===filterAktif?'active':''}" onclick="setFilter('${f}')">${f}</button>`).join('');
+
+  let tampil = filterAktif==='Semua' ? data : data.filter(t=>t.mapel===filterAktif);
+  let doneTotal=data.filter(t=>t.done).length;
+  let pct=data.length?Math.round(doneTotal/data.length*100):0;
+  document.getElementById('pct').innerText=pct+'% ('+doneTotal+'/'+data.length+')';
+  document.getElementById('bar').style.width=pct+'%';
+
+  list.innerHTML='';
+  tampil.forEach((t)=>{
+    let i=data.indexOf(t);
+    list.innerHTML+=`<div class="task ${t.done?'done':''}">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggle(${i})">
+      <div class="info"><div>${t.nama}</div><div style="font-size:12px;color:var(--muted)">${t.tgl}</div></div>
+      <span class="mapel">${t.mapel}</span>
+      <button class="del" onclick="hapus(${i})" style="background:none;border:none;color:#f87171;cursor:pointer">×</button>
+    </div>`;
+  });
+  if(!tampil.length) list.innerHTML='<p style="text-align:center;color:var(--muted);margin-top:20px">Belum ada data</p>';
+  renderStats();
+  renderKalender();
+}
+render();
+</script>
+</body>
+    </html>
